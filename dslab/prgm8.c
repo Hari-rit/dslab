@@ -74,14 +74,14 @@ void BFS(struct Graph* graph, int startVertex) {
             adjList = adjList->next;
         }
     }
-    for (int i = 0; i < graph->numVertices; i++) {
-        if (!visited[i]) {
-            queue[rear++] = i;
-            visited[i] = true;
-            printf("%d ", i);
-        }
-    }
-    printf("\n");
+    //for (int i = 0; i < graph->numVertices; i++) {
+      //  if (!visited[i]) {
+        //    queue[rear++] = i;
+          //  visited[i] = true;
+           // printf("%d ", i);
+     //   }
+   // }
+  // printf("\n");
 }
 void topologicalSortUtil(struct Graph* graph, int vertex, bool visited[], int stack[], int* stackIndex) {
     visited[vertex] = true;
@@ -159,7 +159,6 @@ int main() {
         printf("5. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
-
         switch (choice) {
             case 1:
                 displayAdjMatrix(&graph);

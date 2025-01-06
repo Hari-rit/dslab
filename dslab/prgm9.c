@@ -1,136 +1,140 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-#define MAX_VERTICES 100
-
-// Graph structure
+#define MAX_SIZE 500
+struct Graph *graph;
+struct Graph *gr;
+int stack[MAX_SIZE], top;
+struct adj_list_node {
+    int dest;
+    struct adj_list_node *next;
+};
+struct adj_list {
+    struct adj_list_node *head;
+};
 struct Graph {
-    int V;
-    int adj[MAX_VERTICES][MAX_VERTICES]; // Adjacency matrix
+int V;
+
+    int *visited;
+struct adj_list *array;
 };
-
-// Stack structure for the DFS order
-struct Stack {
-    int items[MAX_VERTICES];
-    int top;
-};
-
-// Functions for the Stack
-void push(struct Stack* stack, int v) {
-    stack->items[++(stack->top)] = v;
+struct adj_list_node *new_adj_list_node(int dest) {
+    struct adj_list_node *newNode = (struct adj_list_node *)malloc(sizeof(struct adj_list_node));
+    newNode->dest = dest;
+    newNode->next = NULL;
+    return newNode;
 }
-
-int pop(struct Stack* stack) {
-    return stack->items[(stack->top)--];
+struct Graph *create_graph(int V) {
+    struct Graph *graph = (struct Graph *)malloc(sizeof(struct Graph));
+    graph->V = V;
+    graph->array = (struct adj_list *)malloc(V * sizeof(struct adj_list));
+    int i;
+    for (i = 0; i < V; ++i)
+        graph->array[i].head = NULL;
+    return graph;
 }
-
-bool isEmpty(struct Stack* stack) {
-    return stack->top == -1;
+void get_transpose(struct Graph *gr, int src, int dest) {
+    struct adj_list_node *newNode = new_adj_list_node(src);
+    newNode->next = gr->array[dest].head;
+    gr->array[dest].head = newNode;
 }
+void add_edge(struct Graph *graph, struct Graph *gr, int src, int dest) {
+    struct adj_list_node *newNode = new_adj_list_node(dest);
+newNode->next = graph->array[src].head;
+    graph->array[src].head = newNode;
+get_transpose(gr, src, dest);
 
-// DFS function to fill the Stack with the finish time order
-void dfs(struct Graph* graph, int v, bool visited[], struct Stack* stack) {
-    visited[v] = true;
-    for (int i = 0; i < graph->V; i++) {
-        if (graph->adj[v][i] && !visited[i]) {
-            dfs(graph, i, visited, stack);
+}
+void print_graph(struct Graph *graph1) {
+    int v;
+    for (v = 0; v < graph1->V; ++v) {
+        struct adj_list_node *temp = graph1->array[v].head;
+        while (temp) {
+            printf("(%d -> %d)\t", v, temp->dest);
+            temp = temp->next;
         }
     }
-    push(stack, v);
 }
-
-// Transpose (reverse) the graph
-void transposeGraph(struct Graph* graph, struct Graph* transposedGraph) {
-    for (int i = 0; i < graph->V; i++) {
-        for (int j = 0; j < graph->V; j++) {
-            if (graph->adj[i][j]) {
-                transposedGraph->adj[j][i] = 1;
-            }
-        }
+void push(int x) {
+    if (top >= MAX_SIZE - 1) {
+        printf("\n\tSTACK is overflow");
+    } else {
+        top++;
+        stack[top] = x;
     }
 }
+void pop() {
+    if (top <= -1) {
+        printf("\n\t Stack is underflow");
+} else {
+        top--;
+    }
+}
+void set_fill_order(struct Graph *graph, int v, bool visited[], int *stack) {
+visited[v] = true;
 
-// DFS on the transposed graph to find SCCs
-void dfsOnTransposed(struct Graph* transposedGraph, int v, bool visited[]) {
+    struct adj_list_node *temp = graph->array[v].head;
+    while (temp) {
+        if (!visited[temp->dest]) {
+            set_fill_order(graph, temp->dest, visited, stack);
+        }
+        temp = temp->next;
+    }
+    push(v);
+}
+void dfs_recursive(struct Graph *gr, int v, bool visited[]) {
     visited[v] = true;
     printf("%d ", v);
-    for (int i = 0; i < transposedGraph->V; i++) {
-        if (transposedGraph->adj[v][i] && !visited[i]) {
-            dfsOnTransposed(transposedGraph, i, visited);
-        }
+    struct adj_list_node *temp = gr->array[v].head;
+    while (temp) {
+        if (!visited[temp->dest])
+            dfs_recursive(gr, temp->dest, visited);
+        temp = temp->next;
     }
 }
-
-// Kosaraju's Algorithm to find SCCs
-void kosaraju(struct Graph* graph) {
-    struct Stack stack;
-    stack.top = -1;
-
-    bool visited[MAX_VERTICES] = {false};
-
-    // Step 1: Perform DFS to fill vertices in stack based on finish time
-    for (int i = 0; i < graph->V; i++) {
-        if (!visited[i]) {
-            dfs(graph, i, visited, &stack);
+void strongly_connected_components(struct Graph *graph, struct Graph *gr, int V) {
+    bool visited[V];
+    for (int i = 0; i < V; i++)
+        visited[i] = false;
+    for (int i = 0; i < V; i++) {
+        if (visited[i] == false) {
+            set_fill_order(graph, i, visited, stack);
         }
-    }
+}
 
-    // Step 2: Reverse the graph
-    struct Graph transposedGraph;
-    transposedGraph.V = graph->V;
-    for (int i = 0; i < graph->V; i++) {
-        for (int j = 0; j < graph->V; j++) {
-            transposedGraph.adj[i][j] = 0;
-        }
-    }
-    transposeGraph(graph, &transposedGraph);
-
-    // Step 3: Perform DFS on the reversed graph using the finish time order
-    for (int i = 0; i < graph->V; i++) {
-        visited[i] = false; // Reset visited for the transposed graph
-    }
-
-    // Process vertices in decreasing order of finish time
-    while (!isEmpty(&stack)) {
-        int v = pop(&stack);
-        if (!visited[v]) {
-            printf("SCC: ");
-            dfsOnTransposed(&transposedGraph, v, visited);
+    int count = 1;
+    for (int i = 0; i < V; i++)
+        visited[i] = false;
+    while (top != -1) {
+        int v = stack[top];
+        pop();
+        if (visited[v] == false) {
+            printf("Strongly connected component %d: \n", count++);
+            dfs_recursive(gr, v, visited);
             printf("\n");
         }
     }
 }
-
 int main() {
-    struct Graph graph;
-    
-    // Take number of vertices as input
-    printf("Enter the number of vertices: ");
-    scanf("%d", &graph.V);
+    int v, max_edges, i, origin, destin;
+top = -1;
+    printf("\n Enter the number of vertices: ");
+    scanf("%d", &v);
+    struct Graph *graph = create_graph(v);
+    struct Graph *gr = create_graph(v);
+    max_edges = v * (v - 1);
+    for (i = 0; i <= max_edges; i++) {
+        printf("Enter edge %d( 0 0 ) to quit : ", i);
+        scanf("%d %d", &origin, &destin);
+        if ((origin == 0) && (destin == 0))
+            break;
+        if (origin > v || destin > v || origin < 0 || destin < 0) {
+            printf("Invalid edge!\n");
 
-    // Initialize adjacency matrix to 0
-    for (int i = 0; i < graph.V; i++) {
-        for (int j = 0; j < graph.V; j++) {
-            graph.adj[i][j] = 0;
-        }
+            i--;
+        } else
+            add_edge(graph, gr, origin, destin);
     }
-
-    // Take number of edges as input
-    int E;
-    printf("Enter the number of edges: ");
-    scanf("%d", &E);
-
-    // Take edges as input
-    printf("Enter the edges (u v) where there is a directed edge from u to v:\n");
-    for (int i = 0; i < E; i++) {
-        int u, v;
-        scanf("%d %d", &u, &v);
-        graph.adj[u][v] = 1;
-    }
-
-    printf("Strongly Connected Components (SCCs):\n");
-    kosaraju(&graph);
-
+    strongly_connected_components(graph, gr, v);
     return 0;
 }
