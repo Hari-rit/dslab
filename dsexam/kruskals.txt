@@ -1,0 +1,82 @@
+#include<stdio.h>
+#include<stdlib.h>
+int parent[10],cost[10][10],n;
+int find(int i){
+    while(parent[i]!=i){
+        i=parent[i];
+    }
+    return i;
+}
+int unionset(int i,int j){
+    int a=find(i);
+    int b=find(j);
+    parent[a]=b;
+    return 0;
+}
+void main(){
+    int e,min,mincost,ne=1,src,dest,weg,u,v,a,b;
+    printf("\nEnter the number of nodes:");
+    scanf("%d",&n);
+    printf("\nEnter the number of edges:");
+    scanf("%d",&e);
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
+            cost[i][j]=999;
+        }
+    }
+    printf("\nEnter the matrix (source destination weight)\n");
+    for(int i=0;i<e;i++){
+        scanf("%d %d %d",&src,&dest,&weg);
+        cost[src][dest]=weg;
+        cost[dest][src]=weg;
+    }
+    printf("\n");
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
+            if(cost[i][j]==999){
+                printf("0\t");
+            }
+            else{
+                printf("%d\t",cost[i][j]);
+            }
+        }
+        printf("\n");
+    }
+    for (int i = 0; i < n; i++)
+        parent[i] = i;
+    while(ne<n){
+        min=999;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(cost[i][j]<min){
+                    min=cost[i][j];
+                    mincost=mincost+min;
+                    a=u=i;
+                    b=v=j;
+                }
+            }
+        }
+        u=find(u);
+        v=find(v);
+        if(u!=v){//check for cycle
+            printf("%d",min);
+            printf("Edge %d: (%d, %d) cost: %d\n", ne++, a, b, min);
+            unionset(u, v);
+        }
+        cost[a][b]=cost[b][a]=999;//replace min value with 999
+    }
+    printf("\nMinimum cost: %d\n", mincost);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

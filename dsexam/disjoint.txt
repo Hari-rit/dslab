@@ -1,0 +1,155 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+struct node{
+    int data;
+    struct node*next;
+    struct node*rep;
+};
+struct node*head[50];
+int countroot=0;
+void makeSet(int x){
+    struct node*new=(struct node*)malloc(sizeof(struct node));
+    new->data=x;
+    new->rep=new;
+    new->next=NULL;
+    head[countroot]=new;
+    countroot++;
+}
+struct node*find(int a){
+    int i;
+    struct node*temp;
+    for(i=0;i<countroot;i++){
+        temp=head[i];
+        while(temp!=NULL){
+        if(temp->data==a){
+            return temp->rep;
+            }
+            temp=temp->next;
+        }
+        
+    }
+    return NULL;
+}
+void unionSets(int a,int b){
+    int i,j;
+    struct node*rep1=find(a);
+    struct node*rep2=find(b);
+    if (rep1 == NULL || rep2 == NULL) {
+        printf("\nElement(s) not present in the DS\n");
+        return;
+    }
+    if(rep1!=rep2){
+        for(j=0;j<countroot;j++){
+            if(head[j]==rep2){
+                for (i = j; i < countroot - 1; i++) {//loop replace node 1 position countroot-1 since 1 set is gonna be merged
+                    head[i]=head[i+1];//replace the location of rep2 node with node below it and so on
+                }
+                countroot--;
+                break;
+            }
+        }
+        struct node*temp=rep2;
+        while(temp!=NULL){
+            temp->rep=rep1;
+            temp=temp->next;
+        }
+        struct node*tail=rep1;
+        while(tail->next!=NULL){
+            tail=tail->next;
+        }
+        tail->next=rep2;
+    }
+}
+int search(int x) {
+    int i;
+    struct node *tmp;
+    for (i = 0; i < countroot; i++) {
+        tmp = head[i];
+        while (tmp != NULL) {
+            if (tmp->data == x)
+                return 1; // Element found in the set.
+            tmp = tmp->next;
+        }
+    }
+    return 0; // Element not found in any set.
+}
+void displayRepresentatives() {
+    printf("\nSet Representatives: ");
+    for (int i = 0; i < countroot; i++) {
+        printf("%d ", head[i]->data);  // heads[i] points to the representative of the i-th set
+    }
+    printf("\n");
+}
+void displaySets() {
+    int i;
+    struct node *temp;
+    printf("\nDisjoint Sets:\n");
+    for (i = 0; i < countroot; i++) {
+        temp = head[i];  // Start from the representative of each set
+        printf("{ ");
+        int first = 1;
+        while (temp != NULL) {
+            if (!first) printf(", ");
+            printf("%d", temp->data);  // Print the data of the node
+            first = 0;
+            temp = temp->next;  // Move to the next element in the set
+        }
+        printf(" }\n");
+    }
+}
+void main() {
+    int choice, x, y;
+    
+    while (1) {
+        printf("\n1. Make Set");
+        printf("\n2. Display set representatives");
+        printf("\n3. Union");
+        printf("\n4. Find Set");
+        printf("\n5. Display all sets");
+        printf("\n6. Exit");
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                printf("Enter the Element to Make a Set: ");
+                scanf("%d", &x);
+                if(search(x)) {
+                    printf("\nElement %d is already Exist In the Set, Enter the Unique Element.\n", x);
+                } else {
+                    makeSet(x);
+                }
+                break;
+            case 2:
+                displayRepresentatives();
+                break;
+            case 3:
+                printf("\nEnter first element: ");
+                scanf("%d", &x);
+                printf("Enter second element: ");
+                scanf("%d", &y);
+                unionSets(x, y);
+                break;
+            case 4:
+                printf("\nEnter the element to find: ");
+                scanf("%d", &x);
+                struct node *rep = find(x);
+                if (rep == NULL) {
+                    printf("\nElement not present in the DS\n");
+                } else {
+                    printf("\nThe representative of %d is %d\n", x, rep->data);
+                }
+                break;
+            case 5:
+                displaySets();
+                break;
+            case 6:
+                printf("\nExiting program...\n");
+                exit(0);  
+            default:
+                printf("\nInvalid choice! Please try again.\n");
+                break;
+        }
+    }
+}

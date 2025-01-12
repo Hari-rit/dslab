@@ -1,0 +1,108 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+struct node{
+    int data;
+    struct node*next;
+};
+struct node*front=NULL;
+struct node*rear=NULL;
+
+void insert(){
+    int item;
+    printf("\nEnter the item to be inserted:\t");
+    scanf("%d",&item);
+    struct node*newnode=(struct node*)malloc(sizeof(struct node));
+    newnode->data=item;
+    newnode ->next=NULL;
+    if (front == NULL && rear == NULL){
+        front=rear=newnode;
+        rear->next=front;
+        return;
+    }
+    struct node*temp=front;
+    while(temp->next!=front){
+        temp=temp->next;
+    }
+    temp->next=newnode;
+    newnode->next=front;
+    rear=newnode;
+}
+void delete(){
+    struct node*temp=front;
+    if (front == NULL && rear == NULL){
+        printf("QUEUE IS EMPTY");
+        return;
+    }
+    if(front==rear){
+        printf("%d deleted",front->data);
+        front=rear=NULL;
+        return;
+    }
+    front=front->next;
+    rear->next=front;
+    printf("%d deleted",temp->data);
+    free(temp);
+    ;
+}
+void display(){
+    struct node*temp=front;
+    if (front == NULL && rear == NULL){
+        printf("QUEUE IS EMPTY");
+        return;
+    }
+    do {
+        printf("%d\t", temp->data);  
+        temp = temp->next;  
+    } while (temp != front); 
+}
+void search(){
+    int item;
+    struct node*temp=front;
+if (front == NULL && rear == NULL){
+        printf("QUEUE IS EMPTY");
+        return;
+    }
+    printf("\nEnter the element to be searched:");
+    scanf("%d",&item);
+    int count=0;
+    do{
+       if(item==temp->data){
+            count++;
+            printf("\n%d found",item);
+            return;
+        }
+        temp=temp->next; 
+    }
+    while (temp!=front);
+    if(count==0){
+            printf("element not found");
+            return;
+    }
+}
+int main() {
+    int choice;
+    while (1) {
+        printf("\n1. ENQUEUE\n2. DEQUEUE\n3. Display\n4. Search\n5. Exit\n");
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+        switch (choice) {
+            case 1:
+                insert();
+                break;
+            case 2:
+                delete();
+                break;
+            case 3:
+                display();
+                break;
+            case 4:
+                search();
+                break;
+            case 5:
+                exit(0);
+            default:
+                printf("\nInvalid choice\n");
+        }
+    }
+}

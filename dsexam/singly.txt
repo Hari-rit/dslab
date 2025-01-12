@@ -1,0 +1,200 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+struct node{
+    int data;
+    struct node*next;
+};
+struct node*head=NULL;
+void ins_beg(int key){
+    struct node*newnode=(struct node*)malloc(sizeof(struct node));
+    newnode->data=key;
+    newnode->next=NULL;
+    if (head==NULL){
+        head=newnode;
+    }
+    else{
+        newnode->next=head;
+        head=newnode;
+    }
+}
+void ins_end(int key){
+    struct node*newnode=(struct node*)malloc(sizeof(struct node));
+    struct node*temp=head;
+    newnode->data=key;
+    newnode->next=NULL;
+    if(head==NULL){
+        ins_beg(key);
+        return;
+    }
+    while(temp->next!=NULL){
+        temp=temp->next;
+    }
+    temp->next=newnode;
+}
+void ins_pos(int item,int pos){
+    struct node*newnode=(struct node*)malloc(sizeof(struct node));
+    newnode->data=item;
+    newnode->next=NULL;
+    struct node* temp = head;
+    struct node* prev = NULL;
+    if (pos < 1) {
+        printf("\nInvalid position\n");
+        return;
+    }
+    if (pos == 1) {
+        ins_beg(item);
+        return;
+    }
+    int count = 0;
+    while (temp != NULL && count<pos-1) {
+        prev = temp;
+        count++;
+        temp = temp->next;
+        
+    }
+    if (temp == NULL) {
+        printf("\nPosition out of range\n");
+        return;
+    }
+    newnode->next=prev->next;
+    prev->next=newnode;
+    
+}
+void del_beg(){
+    struct node*temp=head;
+    if (head==NULL){
+        printf("\nList is empty\n");
+        return;
+    }
+    if(head->next==NULL){
+        printf("\n%d deleted\n",head->data);
+        free(head);
+        head=NULL;
+        return;
+    }
+    if(head->next!=NULL){
+        head=head->next;
+        temp->next=NULL;
+        printf("\n%d deleted\n",temp->data);
+        free(temp);
+        return;
+    }
+}
+void del_pos(int pos) {
+    struct node* temp = head;
+    struct node* prev = NULL;
+    if (pos < 1) {
+        printf("\nInvalid position\n");
+        return;
+    }
+    if (pos == 1) {
+        del_beg();
+        return;
+    }
+    int count = 0;
+    while (temp != NULL && count<pos-1) {
+        prev = temp;
+        count++;
+        temp = temp->next;
+        
+    }
+    if (temp == NULL) {
+        printf("\nPosition out of range\n");
+        return;
+    }
+    prev->next = temp->next;
+    printf("\nDeleted element is: %d\n", temp->data);
+    free(temp);
+}
+void del_end(){
+    struct node* temp=head;
+    if (head==NULL){
+        printf("\nList is empty\n");
+        return;
+    }
+    if(head->next==NULL){
+        printf("\n%d deleted\n",head->data);
+        free(head);
+        head=NULL;
+        return;
+    }
+    while(temp->next->next!=NULL){
+        temp=temp->next;
+    }
+    printf("\n%d deleted\n",temp->next->data);
+    free(temp->next->next);
+    temp->next=NULL;
+}
+void display(){
+    if (head==NULL){
+        printf("\nList is empty\n");
+        return;
+    }
+    struct node*temp=head;
+    while(temp!=NULL){
+        printf("%d\t",temp->data);
+        temp=temp->next;
+    }
+}
+void main(){
+    int ch;
+    while (1)
+    {
+        printf("\n1.INSERT AT BEG\n2.INSTERT AT END\n3.INSERT AT POS\n4.DELETE AT BEG\n5.DELETE AT END\n6.DELETE AT POS\n7.DISPLAY\n8.EXIT\n\nENTER YOUR CHOICE:");
+        scanf("%d",&ch);
+        switch (ch)
+        {
+        case 1:
+            int item;
+            printf("\nEnter the element to be inserted");
+            scanf("%d",&item);
+            ins_beg(item);
+            break;
+
+            case 2:
+            int item2;
+            printf("\nEnter the element to be inserted");
+            scanf("%d",&item2);
+            ins_end(item2);
+            break;
+
+            case 3:
+            int item3,pos2;
+            printf("\nEnter the element to be inserted");
+            scanf("%d",&item3);
+            printf("\nEnter the position of element to be inserted");
+            scanf("%d",&pos2);
+            ins_pos(item3,pos2);
+            break;
+
+            case 4:
+            del_beg();
+            break;
+
+            case 5:
+            del_end();
+            break;
+
+            case 6:
+            int pos;
+            printf("\nEnter the element pos of element to be deleted:");
+            scanf("%d",&pos);
+            del_pos(pos);
+            break;
+            
+            case 7:
+            display();
+            break;
+
+            case 8:
+            printf("\nExiting....");
+            exit(0);
+            break;
+
+        default:
+            printf("\nInvalid choice!");
+            break;
+        }
+    }
+}
